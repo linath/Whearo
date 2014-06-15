@@ -3,6 +3,8 @@ package net.skix.whearo;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,6 +56,7 @@ public class SpheroActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_sphero);
 
         speedView = (TextView) findViewById(R.id.speedView);
@@ -118,15 +121,27 @@ public class SpheroActivity extends Activity {
         });
 
 
+
         mSpheroConnectionView = (SpheroConnectionView) findViewById(R.id.sphero_connection_view);
         mSpheroConnectionView.setSingleSpheroMode(true); // todo - allow connection of more than one.
+
+
+    }
+
+    /**
+     * Called when the user comes back to this app
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         RobotProvider.getDefaultProvider().addConnectionListener(new ConnectionListener() {
 
             @Override
             public void onConnected(Robot robot) {
                 mRobot = (Sphero) robot;
-                Log.d(TAG, "Version:" + mRobot.getVersion());
+
+                Log.i(TAG, "connected to version:" + mRobot.getVersion());
 
                 createNotification();
                 startBlink(null);
@@ -136,27 +151,24 @@ public class SpheroActivity extends Activity {
             @Override
             public void onConnectionFailed(Robot sphero) {
                 // let the SpheroConnectionView handle or hide it and do something here...
+                Log.i(TAG,"connection failed");
             }
 
             @Override
             public void onDisconnected(Robot sphero) {
+                Log.i(TAG,"connection disconnected");
+                mRobot = null;
+
                 if (!sphero.isConnected()) {
                     mSpheroConnectionView.startDiscovery();
                 }
             }
 
         });
-    }
 
-    /**
-     * Called when the user comes back to this app
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mRobot == null) {
-            mSpheroConnectionView.startDiscovery();
-        }
+//        if (mRobot == null) {
+//            mSpheroConnectionView.startDiscovery();
+//        }
     }
 
     /**
@@ -171,7 +183,7 @@ public class SpheroActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-
+        stopBlink(null);
         // Disconnect Robot properly
         RobotProvider.getDefaultProvider().disconnectControlledRobots();
         RobotProvider.getDefaultProvider().removeDiscoveryListeners();
@@ -275,14 +287,15 @@ public class SpheroActivity extends Activity {
         // Build intent for notification content
 
 
+        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.sphero);
+
+
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setSmallIcon(R.drawable.sphero)
+                        .setLargeIcon(bm)
                         .setContentTitle("Sphero")
                         .setContentText("Connected")
-
-                        .addAction(R.drawable.play,
-                                "Blink", createIntentWithUrl(BLINK))
 
                         .addAction(R.drawable.eight,
                                 "Draw an 8", createIntentWithUrl(DRIVE))
@@ -337,8 +350,11 @@ public class SpheroActivity extends Activity {
                 }
             }
 
-
-            mRobot.drive(rotation, speed);
+            if(mRobot != null && mRobot.isConnected()) {
+                mRobot.drive(rotation, speed);
+            } else {
+                shouldStop = true;
+            }
 
             SpheroActivity.driveEight(mRobot, rotation, isFirstEight);
 
