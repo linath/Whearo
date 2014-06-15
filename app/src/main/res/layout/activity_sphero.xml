@@ -77,6 +77,36 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Speed "
+                android:textColor="#FFF"/>
+
+            <TextView
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/speedView"
+                android:textAlignment="center"
+                android:text="0.5"
+                android:textColor="#FFF"
+                />
+
+            <SeekBar
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/speedSlider"
+                android:progress="5"
+                android:max="10"
+                />
+
+        </LinearLayout>
+
         <orbotix.view.connection.SpheroConnectionView
             android:id="@+id/sphero_connection_view"
             android:layout_width="fill_parent"

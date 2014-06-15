@@ -40,7 +40,9 @@ public class SpheroActivity extends Activity {
     private final static String DRIVE = "do:driveEight";
     private final static String STOP = "do:stopDrive";
 
-    private final static float speed = 0.5f;
+    private SeekBar speedSlider;
+    private TextView speedView;
+    private static float speed = 0.5f;
 
     private SeekBar durationSlider;
     private TextView durationView;
@@ -54,11 +56,40 @@ public class SpheroActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sphero);
 
+        speedView = (TextView) findViewById(R.id.speedView);
+        speedSlider = (SeekBar) findViewById(R.id.speedSlider);
+
         durationView = (TextView) findViewById(R.id.durationView);
         durationSlider = (SeekBar) findViewById(R.id.durationSlider);
 
 
         duration = durationSlider.getProgress();
+
+        speedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                if (progress < 1) {
+                    speedSlider.setProgress(1);
+                } else {
+                    // TODO Auto-generated method stub
+                    Log.i(TAG, "changed speed seekbar to value: " + progress);
+                    speedView.setText(Float.toString(progress/10.f));
+                    speed = progress/10.f;
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+        });
 
         durationSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -70,7 +101,7 @@ public class SpheroActivity extends Activity {
                 } else {
                     // TODO Auto-generated method stub
                     Log.i(TAG, "changed seekbar to value: " + progress);
-                    durationView.setText("" + progress);
+                    durationView.setText(Integer.toString(progress));
                     duration = progress;
                 }
             }
@@ -123,7 +154,7 @@ public class SpheroActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mRobot == null || !mRobot.isConnected()) {
+        if (mRobot == null) {
             mSpheroConnectionView.startDiscovery();
         }
     }
@@ -290,7 +321,6 @@ public class SpheroActivity extends Activity {
             if(shouldStop) {
                 return;
             }
-            mRobot.drive(rotation, speed);
 
             if (isFirstEight) {
 
@@ -306,6 +336,9 @@ public class SpheroActivity extends Activity {
                     isFirstEight = true;
                 }
             }
+
+
+            mRobot.drive(rotation, speed);
 
             SpheroActivity.driveEight(mRobot, rotation, isFirstEight);
 
